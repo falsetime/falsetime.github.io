@@ -75,7 +75,7 @@ function myItems(jsonString){
   console.log(labels);
 
   for (let i = 0; i < json.table.rows.length; i++) { // [ [[0]:timestamp, [1]:value1, [2]value2 ... [N]valueN] , ... ]
-    for (let j = 0; j < json.table.rows.c.length; i++){ 
+    for (let j = 0; j < json.table.rows.c.length; j++){ 
       gdata[i].push(json.table.rows[i].c[j]); // C er en array [0]:timestamp, [1]:value1, [2]value2 ... [N]valueN
     }
   } 
