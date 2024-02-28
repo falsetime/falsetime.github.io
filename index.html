@@ -11,47 +11,37 @@
       left: 10px;
       right: 10px;
       top: 10px;
-      bottom: 20%;
+      bottom: 10px;
     }
 
-    #json {
-      position: absolute;
-      bottom: 10%;
-      left: 50%;
-      right: 50%;
-    }
+    #liste { 
+    height: 40px;
+    position: fixed; 
+    bottom:10%;
+    width:100%; 
+}
 
 </style>
 </head>
 <body>
 <div id="graph"></div>
-<div id="json">json</div>
+<div id="liste"></div>
 
 <script>
 
-console.log(String(new Date()));
-let grafdata = [[new Date(), 15]];
+grafdata = [[1]];
+labels = ['a'];
 
-        //for at grafen skal huske kor musa var når den blir updated
-        var last_mousemove_evt = null;
-        var on_graph = false;
+g = new Dygraph(document.getElementById("graph"), grafdata, {
+    animatedZooms: true,
+    labels: ['a'],
+    title: 'Dygraphs ' + Dygraph.VERSION
+});
 
-        g = new Dygraph(document.getElementById("graph"), grafdata, {
-            animatedZooms: true,
-            title: 'dygraphs ' + Dygraph.VERSION + ' chart template',
-            labels: ["tid","verdi"],
-
-            //minne for mus
-            highlightCallback: function (e, x, pts, row) {
-                last_mousemove_evt = e;
-                on_graph = true
-            },
-            unhighlightCallback: function (e) {
-                on_graph = false;
-            }
-
-        });
-
+g.updateOptions({
+'file': grafdata,
+labels: labels
+}); 
 
 var id = '1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U';
 var gid = '0';
@@ -59,47 +49,41 @@ var url = 'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&tq
 //https://docs.google.com/spreadsheets/d/1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U/edit#gid=0
 fetch(url)
   .then(response => response.text())
-  .then(data => document.getElementById("json").innerHTML=myItems(data.substring(47).slice(0, -2))  
+  .then(data => myItems(data.substring(47).slice(0, -2))  
   );
 function myItems(jsonString){
   var json = JSON.parse(jsonString);
-  console.log("json under her");
+  console.log("json object fra google:");
   console.log(json);
 
-  gdata = [];
   labels = [];
   for (let i = 0; i < json.table.cols.length; i++) {
       labels.push(json.table.cols[i].label);
   } 
-  console.log("labels under her");
+  console.log("labels henta fra json:");
   console.log(labels);
 
+grafdata = [];
   for (let i = 0; i < json.table.rows.length; i++) { // [ [[0]:timestamp, [1]:value1, [2]value2 ... [N]valueN] , ... ]
-    for (let j = 0; j < json.table.rows.c.length; j++){ 
-      gdata[i].push(json.table.rows[i].c[j]); // C er en array [0]:timestamp, [1]:value1, [2]value2 ... [N]valueN
+    tmp=[];
+    for (let j = 0; j < json.table.rows[i].c.length; j++){
+      tmp.push(json.table.rows[i].c[j].v); // C er en array [0]:timestamp, [1]:value1, [2]value2 ... [N]valueN
     }
-  } 
+    grafdata.push(tmp);
+    grafdata[i][0] = new Date(grafdata[i][0] * 1000); //må gjøre unix time om til date object
+  }
 
-  console.log("gdata under her");
-  console.log(gdata);
+  console.log("grafdata henta og konvertert fra json:");
+  console.log(grafdata);
 
-  var table = '<table><tr>'
-  json.table.cols.forEach(colonne => table += '<th>' + colonne.label + '</th>')
-  table += '</tr>'
-  json.table.rows.forEach(ligne => {
-    table += '<tr>'
-    ligne.c.forEach(cellule => {
-        try{var valeur = cellule.f ? cellule.f : cellule.v}
-        catch(e){var valeur = ''}
-        table += '<td>' + valeur + '</td>'
-      }
-    )
-    table += '</tr>'
-    }
-  )
-  table += '</table>'
-  return table
+g.updateOptions({
+'file': grafdata,
+labels: labels
+}); 
+  
 }
+
+
 
 </script>
 
