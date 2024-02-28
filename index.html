@@ -69,14 +69,14 @@ function myItems(jsonString){
   gdata = [];
   labels = [];
   for (let i = 0; i < json.table.cols.length; i++) {
-      labels.push(json.table.cols(i).label);
+      labels.push(json.table.cols[i].label);
   } 
   console.log("labels under her");
   console.log(labels);
 
   for (let i = 0; i < json.table.rows.length; i++) { // [ [[0]:timestamp, [1]:value1, [2]value2 ... [N]valueN] , ... ]
     for (let j = 0; j < json.table.rows.c.length; i++){ 
-      gdata.push[i][json.table.rows(i).c(j)]; // C er en array [0]:timestamp, [1]:value1, [2]value2 ... [N]valueN
+      gdata[i].push(json.table.rows[i].c[j]); // C er en array [0]:timestamp, [1]:value1, [2]value2 ... [N]valueN
     }
   } 
 
