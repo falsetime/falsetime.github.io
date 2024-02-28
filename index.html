@@ -24,7 +24,6 @@
 <script>
 
 let data = [[new Date(), 15]];
-console.log(data);
 
         //for at grafen skal huske kor musa var når den blir updated
         var last_mousemove_evt = null;
@@ -56,6 +55,7 @@ fetch(url)
   );
 function myItems(jsonString){
   var json = JSON.parse(jsonString);
+  console.log(json);
   var table = '<table><tr>'
   json.table.cols.forEach(colonne => table += '<th>' + colonne.label + '</th>')
   table += '</tr>'
