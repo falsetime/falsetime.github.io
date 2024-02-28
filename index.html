@@ -10,16 +10,22 @@
       position: absolute;
       left: 10px;
       right: 10px;
-      top: 20%;
-      bottom: 10px;
+      top: 10px;
+      bottom: 20%;
     }
-</style>
 
+    #json {
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      right: 50%;
+    }
+
+</style>
 </head>
 <body>
-    <div id="json">json here</div>
-<center>ola er dyktig!</center>
 <div id="graph"></div>
+<div id="json">json</div>
 
 <script>
 
@@ -49,6 +55,7 @@ let data = [[new Date(), 15]];
 var id = '1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U';
 var gid = '0';
 var url = 'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&tq&gid='+gid;
+//https://docs.google.com/spreadsheets/d/1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U/edit#gid=0
 fetch(url)
   .then(response => response.text())
   .then(data => document.getElementById("json").innerHTML=myItems(data.substring(47).slice(0, -2))  
