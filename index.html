@@ -65,6 +65,24 @@ function myItems(jsonString){
   var json = JSON.parse(jsonString);
   console.log("json under her");
   console.log(json);
+
+  gdata = [];
+  labels = [];
+  for (let i = 0; i < json.table.cols.length; i++) {
+      labels.push(json.table.cols(i).label);
+  } 
+  console.log("labels under her");
+  console.log(labels);
+
+  for (let i = 0; i < json.table.rows.length; i++) { // [ [[0]:timestamp, [1]:value1, [2]value2 ... [N]valueN] , ... ]
+    for (let j = 0; j < json.table.rows.c.length; i++){ 
+      gdata.push[i][json.table.rows(i).c(j)]; // C er en array [0]:timestamp, [1]:value1, [2]value2 ... [N]valueN
+    }
+  } 
+
+  console.log("gdata under her");
+  console.log(gdata);
+
   var table = '<table><tr>'
   json.table.cols.forEach(colonne => table += '<th>' + colonne.label + '</th>')
   table += '</tr>'
