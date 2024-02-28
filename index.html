@@ -29,13 +29,14 @@
 
 <script>
 
-let data = [[new Date(), 15]];
+console.log(String(new Date()));
+let grafdata = [[new Date(), 15]];
 
         //for at grafen skal huske kor musa var når den blir updated
         var last_mousemove_evt = null;
         var on_graph = false;
 
-        g = new Dygraph(document.getElementById("graph"), data, {
+        g = new Dygraph(document.getElementById("graph"), grafdata, {
             animatedZooms: true,
             title: 'dygraphs ' + Dygraph.VERSION + ' chart template',
             labels: ["tid","verdi"],
@@ -62,6 +63,7 @@ fetch(url)
   );
 function myItems(jsonString){
   var json = JSON.parse(jsonString);
+  console.log("json under her");
   console.log(json);
   var table = '<table><tr>'
   json.table.cols.forEach(colonne => table += '<th>' + colonne.label + '</th>')
