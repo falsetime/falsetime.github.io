@@ -35,6 +35,7 @@ labels = ['a'];
 
 g = new Dygraph(document.getElementById("graph"), grafdata, {
     animatedZooms: true,
+    connectSeparatedPoints: true, //ingen visuelle hull ved manglende data
     labels: ['a'],
     title: 'Temperatur fra Florida (yr)'
 });
@@ -56,6 +57,7 @@ function myItems(jsonString){
   var json = JSON.parse(jsonString);
   console.log("json object fra google:");
   console.log(json);
+  console.log(json.table.rows[3].c[2]);
 
   labels = [];
   for (let i = 0; i < json.table.cols.length; i++) {
@@ -68,7 +70,13 @@ grafdata = [];
   for (let i = 0; i < json.table.rows.length; i++) { // [ [[0]:timestamp, [1]:value1, [2]value2 ... [N]valueN] , ... ]
     tmp=[];
     for (let j = 0; j < json.table.rows[i].c.length; j++){
-      tmp.push(json.table.rows[i].c[j].v); // C er en array [0]:timestamp, [1]:value1, [2]value2 ... [N]valueN
+      if (json.table.rows[i].c[j] === null) {     //ved manglende data settes alt innholdet til null, sjekker først
+        tmp.push(null);
+      }
+      else {
+        tmp.push(json.table.rows[i].c[j].v); // C er en array [0]:timestamp, [1]:value1, [2]value2 ... [N]valueN
+      }
+      
     }
     grafdata.push(tmp);
     grafdata[i][0] = new Date(grafdata[i][0] * 1000); //må gjøre unix time om til date object
