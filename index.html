@@ -37,7 +37,7 @@ g = new Dygraph(document.getElementById("graph"), grafdata, {
     animatedZooms: true,
     connectSeparatedPoints: true, //ingen visuelle hull ved manglende data
     labels: ['a'],
-    //customBars: true,
+    customBars: true,
     title: 'Temperatur fra Florida, Bergen. Meteorologisk institutt (MET)'
 });
 
@@ -64,7 +64,7 @@ function myItems(jsonString){
   for (let i = 0; i < json.table.cols.length; i++) {
     tmp.push(json.table.cols[i].label);
   } 
-  labels = [tmp[0], tmp[3], tmp[2], tmp[1]];
+  labels = [tmp[0], tmp[2]];
   console.log("labels henta fra json:");
   console.log(labels);
 
@@ -81,7 +81,7 @@ grafdata = [];
       }
       
     }
-    grafdata.push([ tmp[0], tmp[3], tmp[2], tmp[1] ]); // dygraph må ha dataen tid, min, avg, max
+    grafdata.push([ tmp[0], [tmp[3], tmp[2], tmp[1]] ]); // dygraph må ha dataen tid, min, avg, max
     dato = grafdata[i][0].split(".");
     grafdata[i][0] = new Date(dato[2]+'/'+dato[1]+'/'+dato[0]); //snur om på dag og år pga krav fra dygraphs
     //grafdata[i][0] = Date.parse(grafdata[i][0] * 1000); //endrer tid-dataen slik at dygraphs kan bruke den
