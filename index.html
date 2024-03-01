@@ -59,39 +59,45 @@ function myItems(jsonString){
   console.log("json object fra google:");
   console.log(json);
 
-  tmp=[];
+  labels_tmp=[];
   labels = [];
-  for (let i = 0; i < json.table.cols.length; i++) {
-    tmp.push(json.table.cols[i].label);
+  for (let i = 0; i < json.table.rows[0].c.length; i++) { //tekst er alltid i posisjon 0
+    labels_tmp.push(json.table.rows[0].c[i].v);
   } 
-  labels = [tmp[0], tmp[2]];
-  console.log("labels henta fra json:");
-  console.log(labels);
+
+  labels.push(labels_tmp[0],labels_tmp[1]);
 
 dato = [];
+dato2 = [];
 grafdata = [];
-  for (let i = 0; i < json.table.rows.length; i++) { // [ [[0]:timestamp, [1]:value1, [2]value2 ... [N]valueN] , ... ]
+  for (let i = 1; i < json.table.rows.length; i++) { 
     tmp=[];
     for (let j = 0; j < json.table.rows[i].c.length; j++){
+      tmp.push(json.table.rows[i].c[j].v); 
+      /*
       if (json.table.rows[i].c[j] === null) {     //ved manglende data settes alt innholdet til null, sjekker først
         tmp.push(null);
       }
       else {
-        tmp.push(json.table.rows[i].c[j].v); // C er en array [0]:timestamp, [1]:value1, [2]value2 ... [N]valueN
+        tmp.push(json.table.rows[i].c[j].v); 
       }
-      
+      */
     }
-    for (let k = 1; k < tmp.length; k++) {
-      tmp[k] = Number(String(tmp[k]).replace(",","."));
+    
+    for (let k = 1; k < tmp.length; k++) {              
+      tmp[k] = Number(String(tmp[k]).replace(",","."));   //konverterer norsk tallformat til engelsk
     }
-    grafdata.push([ tmp[0], [tmp[3], tmp[2], tmp[1]] ]); // dygraph må ha dataen tid, min, avg, max
-    dato = grafdata[i][0].split(".");
-    grafdata[i][0] = new Date(dato[2]+'/'+dato[1]+'/'+dato[0]); //snur om på dag og år pga krav fra dygraphs
-    //grafdata[i][0] = Date.parse(grafdata[i][0] * 1000); //endrer tid-dataen slik at dygraphs kan bruke den
+    
+    dato = tmp[0].split(' ');
+    dato2 = dato[0].split('.');
+
+
+    grafdata.push([ new Date(dato2[2]+'/'+dato2[1]+'/'+dato2[0]+' '+dato[1]), [(tmp[3]), (tmp[1]), (tmp[2])] ]); // dygraph må ha dataen tid, min, avg, max
+
   }
 
  
-
+/*
   for (let i = 0; i < grafdata.length; i++) {                             //for å estimere litt ikke-eksisterende punkter
     if (isNaN(grafdata[i][1][1])) {                                      //er avg NaN?
       if (!isNaN(grafdata[i][1][0]) && !isNaN(grafdata[i][1][2])) {      //finnes min og max?
@@ -107,8 +113,7 @@ grafdata = [];
       }
     }
   }
-
-  console.log(isNaN(grafdata[366][1][1]));
+*/
   console.log("grafdata henta og konvertert fra json:");
   console.log(grafdata);
 
