@@ -13,21 +13,10 @@
       top: 10px;
       bottom: 10px;
     }
-/*
-    #liste { 
-    height: 40px;
-    position: fixed; 
-    bottom:10%;
-    width:100%; 
-}
-*/
 </style>
 </head>
 <body>
 <div id="graph"></div>
-<!--
-<div id="liste"></div>
--->
 <script>
 
 grafdata = [[1]];
@@ -37,7 +26,6 @@ g = new Dygraph(document.getElementById("graph"), grafdata, {
     animatedZooms: true,
     connectSeparatedPoints: true, //ingen visuelle hull ved manglende data
     labels: ['a'],
-    customBars: true,
     title: 'Temperatur fra Florida, Bergen. Meteorologisk institutt (MET)'
 });
 
@@ -50,6 +38,7 @@ var id = '1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U';
 var gid = '0';
 var url = 'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&tq&gid='+gid;
 //https://docs.google.com/spreadsheets/d/1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U/edit#gid=0
+// evig historisk data https://seklima.met.no/observations/
 fetch(url)
   .then(response => response.text())
   .then(data => myItems(data.substring(47).slice(0, -2))  
@@ -66,9 +55,9 @@ function myItems(jsonString){
   } 
 
   labels.push(labels_tmp[0],labels_tmp[1]);
+  console.log("labels:");
+  console.log(labels);
 
-dato = [];
-dato2 = [];
 grafdata = [];
   for (let i = 1; i < json.table.rows.length; i++) { 
     tmp=[];
@@ -83,50 +72,17 @@ grafdata = [];
       }
       */
     }
-    
-    for (let k = 1; k < tmp.length; k++) {              
-      tmp[k] = Number(String(tmp[k]).replace(",","."));   //konverterer norsk tallformat til engelsk
-    }
-    
-    dato = tmp[0].split(' ');
-    dato2 = dato[0].split('.');
-
-
-    grafdata.push([ new Date(dato2[2]+'/'+dato2[1]+'/'+dato2[0]+' '+dato[1]), [(tmp[3]), (tmp[1]), (tmp[2])] ]); // dygraph må ha dataen tid, min, avg, max
-
+    grafdata.push([ new Date(tmp[0]), Number((tmp[1])) ]); // dygraph må ha dataen tid, min, avg, max
   }
 
- 
-/*
-  for (let i = 0; i < grafdata.length; i++) {                             //for å estimere litt ikke-eksisterende punkter
-    if (isNaN(grafdata[i][1][1])) {                                      //er avg NaN?
-      if (!isNaN(grafdata[i][1][0]) && !isNaN(grafdata[i][1][2])) {      //finnes min og max?
-        console.log("min og maks uten avg");
-        grafdata[i][1][1] = (Number(grafdata[i][1][0]) + Number(grafdata[i][1][2]))/2;    // i så fall avg = min+max/2
-        console.log(grafdata[i][1][1]);
-      }
-      else if (!isNaN(grafdata[i][1][0])) {                              //er avg null, og bare min finnes? 
-        grafdata[i][1][1] = grafdata[i][1][0];                            //avg = min
-      }
-      else if (!isNaN(grafdata[i][1][2])) {                              //er avg null og min null?
-        grafdata[i][1][1] = grafdata[i][1][2];                            //avg = max
-      }
-    }
-  }
-*/
   console.log("grafdata henta og konvertert fra json:");
   console.log(grafdata);
 
-g.updateOptions({
-'file': grafdata,
-labels: labels
-}); 
-  
+  g.updateOptions({
+  'file': grafdata,
+  labels: labels
+  });
 }
-
-
-
 </script>
-
 </body>
 </html>
