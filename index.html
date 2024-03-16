@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<head>
-<title>EOS</title>
-<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
-<script type="text/javascript" src="https://unpkg.com/dygraphs@2.2.1/dist/dygraph.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://unpkg.com/dygraphs@2.2.1/dist/dygraph.min.css" />
 
-<style type="text/css">
+<head>
+  <title>EOS</title>
+  <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/dygraphs@2.2.1/dist/dygraph.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/dygraphs@2.2.1/dist/dygraph.min.css" />
+
+  <style type="text/css">
     #graph {
       position: absolute;
       left: 10px;
@@ -13,65 +14,67 @@
       top: 10px;
       bottom: 10px;
     }
-</style>
+  </style>
 </head>
+
 <body>
-<div id="graph"></div>
-<script>
+  <div id="graph"></div>
+  <script>
 
-grafdata = [];
-labels = [];
+    grafdata = [];
+    labels = [];
 
-g = new Dygraph(document.getElementById("graph"), grafdata, {
-    animatedZooms: true,
-    connectSeparatedPoints: true, //ingen visuelle hull ved manglende data
-    labels: ['null'], // bare for å unngå feilmelding
-    title: 'Temperatur fra Florida, Bergen. Meteorologisk institutt (MET)'
-});
+    g = new Dygraph(document.getElementById("graph"), grafdata, {
+      animatedZooms: true,
+      connectSeparatedPoints: true, //ingen visuelle hull ved manglende data
+      labels: ['null'], // bare for å unngå feilmelding
+      title: 'Temperatur fra Florida, Bergen. Meteorologisk institutt (MET)'
+    });
 
-const id = '1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U';
-const gid = '0';
-const url = 'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&tq&gid='+gid;
-//https://docs.google.com/spreadsheets/d/1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U/edit#gid=0
-// evig historisk data https://seklima.met.no/observations/
-fetch(url)
-  .then(response => response.text())
-  .then(data => myItems(data.substring(47).slice(0, -2))  
-  );
-function myItems(jsonString){
-  const json = JSON.parse(jsonString);
-  console.log("json object fra google:");
-  console.log(json);
+    const id = '1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U';
+    const gid = '0';
+    const url = 'https://docs.google.com/spreadsheets/d/' + id + '/gviz/tq?tqx=out:json&tq&gid=' + gid;
+    //https://docs.google.com/spreadsheets/d/1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U/edit#gid=0
+    // evig historisk data https://seklima.met.no/observations/
+    fetch(url)
+      .then(response => response.text())
+      .then(data => myItems(data.substring(47).slice(0, -2))
+      );
+    function myItems(jsonString) {
+      const json = JSON.parse(jsonString);
+      console.log("json object fra google:");
+      console.log(json);
 
-  labels_tmp=[];
-  labels = [];
-  for (let i = 0; i < json.table.rows[0].c.length; i++) { //tekst er alltid i posisjon 0
-    labels_tmp.push(json.table.rows[0].c[i].v);
-  } 
-
-  labels.push(labels_tmp[0],labels_tmp[1]);
-  console.log("labels:");
-  console.log(labels);
-
-  grafdata = [];
-    for (let i = 1; i < json.table.rows.length; i++) { 
-      tmp=[];
-      for (let j = 0; j < json.table.rows[i].c.length; j++){      
-        tmp.push(json.table.rows[i].c[j].v); 
+      labels_tmp = [];
+      labels = [];
+      for (let i = 0; i < json.table.rows[0].c.length; i++) { //tekst er alltid i posisjon 0
+        labels_tmp.push(json.table.rows[0].c[i].v);
       }
-      grafdata.push([ new Date(tmp[0]), Number((tmp[1])) ]);
+
+      labels.push(labels_tmp[0], labels_tmp[1]);
+      console.log("labels:");
+      console.log(labels);
+
+      grafdata = [];
+      for (let i = 1; i < json.table.rows.length; i++) {
+        tmp = [];
+        for (let j = 0; j < json.table.rows[i].c.length; j++) {
+          tmp.push(json.table.rows[i].c[j].v);
+        }
+        grafdata.push([new Date(tmp[0]), Number((tmp[1]))]);
+      }
+
+      grafdata.sort(function (a, b) { return a[0] - b[0] }); //sorterer etter dato fra eldst til nyest
+
+      console.log("grafdata:");
+      console.log(grafdata);
+
+      g.updateOptions({
+        'file': grafdata,
+        labels: labels
+      });
     }
-
-    grafdata.sort(function(a, b){return a[0]-b[0]}); //sorterer etter dato fra eldst til nyest
-
-  console.log("grafdata:");
-  console.log(grafdata);
-
-  g.updateOptions({
-  'file': grafdata,
-  labels: labels
-  });
-}
-</script>
+  </script>
 </body>
+
 </html>
