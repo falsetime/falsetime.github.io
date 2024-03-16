@@ -19,24 +19,19 @@
 <div id="graph"></div>
 <script>
 
-grafdata = [[1]];
-labels = ['a'];
+grafdata = [];
+labels = [];
 
 g = new Dygraph(document.getElementById("graph"), grafdata, {
     animatedZooms: true,
     connectSeparatedPoints: true, //ingen visuelle hull ved manglende data
-    labels: ['a'],
+    labels: ['null'], // bare for å unngå feilmelding
     title: 'Temperatur fra Florida, Bergen. Meteorologisk institutt (MET)'
 });
 
-g.updateOptions({
-'file': grafdata,
-labels: labels
-}); 
-
-var id = '1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U';
-var gid = '0';
-var url = 'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&tq&gid='+gid;
+const id = '1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U';
+const gid = '0';
+const url = 'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&tq&gid='+gid;
 //https://docs.google.com/spreadsheets/d/1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U/edit#gid=0
 // evig historisk data https://seklima.met.no/observations/
 fetch(url)
@@ -44,7 +39,7 @@ fetch(url)
   .then(data => myItems(data.substring(47).slice(0, -2))  
   );
 function myItems(jsonString){
-  var json = JSON.parse(jsonString);
+  const json = JSON.parse(jsonString);
   console.log("json object fra google:");
   console.log(json);
 
@@ -58,24 +53,18 @@ function myItems(jsonString){
   console.log("labels:");
   console.log(labels);
 
-grafdata = [];
-  for (let i = 1; i < json.table.rows.length; i++) { 
-    tmp=[];
-    for (let j = 0; j < json.table.rows[i].c.length; j++){
-      tmp.push(json.table.rows[i].c[j].v); 
-      /*
-      if (json.table.rows[i].c[j] === null) {     //ved manglende data settes alt innholdet til null, sjekker først
-        tmp.push(null);
-      }
-      else {
+  grafdata = [];
+    for (let i = 1; i < json.table.rows.length; i++) { 
+      tmp=[];
+      for (let j = 0; j < json.table.rows[i].c.length; j++){      
         tmp.push(json.table.rows[i].c[j].v); 
       }
-      */
+      grafdata.push([ new Date(tmp[0]), Number((tmp[1])) ]);
     }
-    grafdata.push([ new Date(tmp[0]), Number((tmp[1])) ]); // dygraph må ha dataen tid, min, avg, max
-  }
 
-  console.log("grafdata henta og konvertert fra json:");
+    grafdata.sort(function(a, b){return a[0]-b[0]}); //sorterer etter dato fra eldst til nyest
+
+  console.log("grafdata:");
   console.log(grafdata);
 
   g.updateOptions({
