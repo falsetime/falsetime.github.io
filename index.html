@@ -21,6 +21,9 @@
   <div id="graph"></div>
   <script>
 
+    // google sheets dokument: https://docs.google.com/spreadsheets/d/1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U/edit#gid=0
+    // evig historisk data å sammenligne med: https://seklima.met.no/observations/
+
     grafdata = [];
     labels = [];
 
@@ -34,8 +37,7 @@
     const id = '1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U';
     const gid = '0';
     const url = 'https://docs.google.com/spreadsheets/d/' + id + '/gviz/tq?tqx=out:json&tq&gid=' + gid;
-    //https://docs.google.com/spreadsheets/d/1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U/edit#gid=0
-    // evig historisk data https://seklima.met.no/observations/
+
     fetch(url)
       .then(response => response.text())
       .then(data => myItems(data.substring(47).slice(0, -2))
@@ -45,26 +47,27 @@
       console.log("json object fra google:");
       console.log(json);
 
-      labels_tmp = [];
-      labels = [];
       for (let i = 0; i < json.table.rows[0].c.length; i++) { //tekst er alltid i posisjon 0
-        labels_tmp.push(json.table.rows[0].c[i].v);
+        labels.push(json.table.rows[0].c[i].v);
       }
 
-      labels.push(labels_tmp[0], labels_tmp[1]);
       console.log("labels:");
       console.log(labels);
 
       grafdata = [];
-      for (let i = 1; i < json.table.rows.length; i++) {
-        tmp = [];
+      for (let i = 0; i < json.table.rows.length; i++) {
+        grafdata[i] = [];
         for (let j = 0; j < json.table.rows[i].c.length; j++) {
-          tmp.push(json.table.rows[i].c[j].v);
+          if (j === 0) {
+            grafdata[i][j] = new Date(json.table.rows[i].c[j].v); //første verdi er alltid tidspunkt, konverterer til date object
+          }
+          else {
+            grafdata[i][j] = Number(json.table.rows[i].c[j].v); // alle andre verdier er tall, konverterer til tall
+          }
         }
-        grafdata.push([new Date(tmp[0]), Number((tmp[1]))]);
       }
-
-      grafdata.sort(function (a, b) { return a[0] - b[0] }); //sorterer etter dato fra eldst til nyest
+      grafdata.shift(); //forkaster første liste, er alltid overskrifter
+      grafdata.sort(function (a, b) { return a[0] - b[0] }); //sorterer etter dato fra eldste til nyeste
 
       console.log("grafdata:");
       console.log(grafdata);
