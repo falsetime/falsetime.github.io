@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Punkt innafor 16</title>
+</head>
+<body>
+Finner felles punkt innafor 16 meter, med kortast mulig snittavstand <br>
+Posisjon 1: <input id="pos0"> <br>
+Posisjon 2: <input id="pos1"> <br>
+Posisjon 3: <input id="pos2"> <br>
+Posisjon 4: <input id="pos3"> <br>
+Posisjon 5: <input id="pos4"> <br>
+<button onclick="finn()">Finn</button>
+<br>
+Ideelle koordinater: <br>
+<span id="koordinater"></span>
+
+<script>
+
+    //henter verdier fra minnet og skriver til input-boksane i html
+    for (var i = 0; i < 5; i++) {
+        if (localStorage.getItem("pos" + i) != null) {
+            document.getElementById("pos" + i).value = localStorage.getItem("pos" + i);
+            console.log("henta "+localStorage.getItem("pos" + i)+" fra minnet");
+        }
+    }
+
+    document.getElementById("koordinater").innerHTML = "ikkje beregna";
+
+    function finn() {
+        var start_timer = Date.now();
+        var spawners = [];
+
+        //henter fra html
+        for (var i = 0; i < 5; i++) {
+            spawners[i] = document.getElementById('pos' + i).value.split(',');
+        }
+
+        //må tvinge om til tall
+        for (i = 0; i < spawners.length; i++) {
+            for (var j = 0; j < spawners[i].length; j++) {
+                spawners[i][j] = Number(spawners[i][j]);
+            }
+        }
+
+        //må slette tomme inputs for at lengden skal bli rett
+        for (i = spawners.length - 1; i >= 0; i--) {
+            if (isNaN(spawners[i][1])) {
+                spawners.splice(i, 1);
+            }
+        }
+
+        //skriver til minnet
+        for (i = 0; i < spawners.length; i++) {
+            localStorage.setItem("pos" + i, spawners[i]);
+            console.log("skreiv " + spawners[i] + " til minnet");
+        }
+
+        console.log("input: ");
+        console.log(spawners);
+
+        var alle_x = [];
+        var alle_y = [];
+        var alle_z = [];
+
+        //samler alle x, y og z i kver sin array
+        for (i = 0; i < spawners.length; i++) {
+            alle_x.push(spawners[i][0]);
+            alle_y.push(spawners[i][1]);
+            alle_z.push(spawners[i][2]);
+        }
+
+        var meter_forbi_grensene = 16; // variabel for morro skyld, vi vil aldri lenger vekk enn 16 uansett
+
+        var x_min_max = min_max(alle_x, meter_forbi_grensene);
+        var y_min_max = min_max(alle_y, meter_forbi_grensene);
+        var z_min_max = min_max(alle_z, meter_forbi_grensene);
+
+        console.log("min/max x: " + x_min_max);
+        console.log("min/max y: " + y_min_max);
+        console.log("min/max z: " + z_min_max);
+
+        var brute_arr = [];
+
+        for (i = x_min_max[0]; i < x_min_max[1]; i++) { // for x
+            for (j = y_min_max[0]; j < y_min_max[1]; j++) { // for y
+                for (var k = z_min_max[0]; k < z_min_max[1]; k++) { // for z
+                    brute_arr.push([i, j, k]); // syr sammen
+                }
+            }
+        }
+
+        console.log("alle verdier for verdier for brute force");
+        console.log(brute_arr);
+
+
+        var avstand = 0;
+        var antall_innafor = 0;
+        var snittavstand = 0;
+        var koordinater = [];
+        var koord_og_avst = [];
+
+        for (i = 0; i < brute_arr.length; i++) {
+            antall_innafor = 0;
+            snittavstand = 0;
+            for (j = 0; j < spawners.length; j++) {
+                avstand = Math.sqrt(Math.pow(-brute_arr[i][0] + spawners[j][0], 2) + Math.pow(-brute_arr[i][1] + spawners[j][1], 2) + Math.pow(-brute_arr[i][2] + spawners[j][2], 2));
+                if (avstand <= 16) {
+                    antall_innafor += 1;
+                    snittavstand += avstand;
+                }
+                if (antall_innafor >= spawners.length) {
+                    snittavstand /= spawners.length;
+                    koordinater = brute_arr[i];
+                    koordinater.push(snittavstand);
+                    koord_og_avst.push(koordinater);
+                }
+            }
+        }
+
+        // sorterer slik at lavast snittavstand kommer først
+
+        koord_og_avst.sort(function (a, b) {
+            return a[koord_og_avst[0].length - 1] - b[koord_og_avst[0].length - 1]
+        });
+
+        // legger til beskrivelse for snittavstand
+        for (i = 0; i < koord_og_avst.length; i++) {
+            koord_og_avst[i][koord_og_avst[i].length - 1] = "   med snittavstand: " + koord_og_avst[i][koord_og_avst[i].length - 1];
+        }
+
+        // ny linje for kvert punkt
+        document.getElementById("koordinater").innerHTML = koord_og_avst.join("<br />");
+        console.log("koordinater_og_snittavstand: ");
+        console.log(koord_og_avst);
+        console.log(Date.now() - start_timer + " ms");
+    }
+
+
+    function min_max(arr, konstant) {
+        var min = Math.min.apply(Math, arr);
+        min -= konstant;
+        var max = Math.max.apply(Math, arr);
+        max += konstant;
+        return [min, max];
+
+    }
+</script>
+
+
+</body>
+</html>
