@@ -24,59 +24,226 @@
     // google sheets dokument: https://docs.google.com/spreadsheets/d/1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U/edit#gid=0
     // evig historisk data å sammenligne med: https://seklima.met.no/observations/
 
-    grafdata = [];
+    grafdata = [[1, 1, 1]];
+    energidata2 = [];
     labels = [];
 
-    g = new Dygraph(document.getElementById("graph"), grafdata, {
-      animatedZooms: true,
-      connectSeparatedPoints: true, //ingen visuelle hull ved manglende data
-      labels: ['null'], // bare for å unngå feilmelding
-      title: 'Temperatur fra Florida, Bergen. Meteorologisk institutt (MET)'
-    });
+
 
     const id = '1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U';
     const gid = '0';
+    const gid2 = '984346979';
     const url = 'https://docs.google.com/spreadsheets/d/' + id + '/gviz/tq?tqx=out:json&tq&gid=' + gid;
+    const url2 = 'https://docs.google.com/spreadsheets/d/' + id + '/gviz/tq?tqx=out:json&tq&gid=' + gid2;
 
-    fetch(url)
-      .then(response => response.text())
-      .then(data => myItems(data.substring(47).slice(0, -2))
-      );
-    function myItems(jsonString) {
-      const json = JSON.parse(jsonString);
-      console.log("json object fra google:");
-      console.log(json);
+    let ferdig1 = false;
+    let ferdig2 = false;
 
-      for (let i = 0; i < json.table.rows[0].c.length; i++) { //tekst er alltid i posisjon 0
-        labels.push(json.table.rows[0].c[i].v);
-      }
+    labels = ['Tid', 'Utetemperatur', 'kWh'];
 
-      console.log("labels:");
-      console.log(labels);
-
-      grafdata = [];
-      for (let i = 0; i < json.table.rows.length; i++) {
-        grafdata[i] = [];
-        for (let j = 0; j < json.table.rows[i].c.length; j++) {
-          if (j === 0) {
-            grafdata[i][j] = new Date(json.table.rows[i].c[j].v); //første verdi er alltid tidspunkt, konverterer til date object
-          }
-          else {
-            grafdata[i][j] = Number(json.table.rows[i].c[j].v); // alle andre verdier er tall, konverterer til tall
-          }
+    g = new Dygraph(document.getElementById("graph"), grafdata, {
+      animatedZooms: true,
+      //connectSeparatedPoints: true, //ingen visuelle hull ved manglende data
+      labels: ['Tid', 'Utetemperatur', 'kWh'], // bare for å unngå feilmelding
+      title: 'Energioppfølgingssystem',
+      series: {
+        "Utetemperatur": {
+          //strokeWidth: 2,
+          //plotter: smoothPlotter,
+          color: "teal"
+        },
+        "kWh": {
+          plotter: barChartPlotter,
+          color: "darkorange"
         }
       }
-      grafdata.shift(); //forkaster første liste, er alltid overskrifter
-      grafdata.sort(function (a, b) { return a[0] - b[0] }); //sorterer etter dato fra eldste til nyeste
+    });
 
-      console.log("grafdata:");
-      console.log(grafdata);
+    function hent_energidata() {
+      fetch(url2)
+        .then(response => response.text())
+        .then(data => myItems2(data.substring(47).slice(0, -2))
+        );
+      function myItems2(jsonString) {
+        const json2 = JSON.parse(jsonString);
+        //console.log("json object med energidata:");
+        //console.log(json2);
 
-      g.updateOptions({
-        'file': grafdata,
-        labels: labels
-      });
+        energidata = [];
+        for (let i = 0; i < json2.table.rows.length; i++) {
+          energidata[i] = [];
+          for (let j = 0; j < json2.table.rows[i].c.length; j++) {
+            if (j === 0) {
+              energidata[i][j] = new Date(json2.table.rows[i].c[j].v.charAt(6) + json2.table.rows[i].c[j].v.charAt(7) + json2.table.rows[i].c[j].v.charAt(8) + json2.table.rows[i].c[j].v.charAt(9) + "-" + json2.table.rows[i].c[j].v.charAt(3) + json2.table.rows[i].c[j].v.charAt(4) + "-" + json2.table.rows[i].c[j].v.charAt(0) + json2.table.rows[i].c[j].v.charAt(1)).getTime() / 1000; //"+ "T00:00:00.000Z"
+            }
+            else {
+              if (json2.table.rows[i].c[j].v !== null) {
+                energidata[i][j] = Number(json2.table.rows[i].c[j].v.replace(",", "."));
+              }
+            }
+          }
+        }
+
+        energidata2 = [];
+        teller = 0;
+        for (let i = 0; i < energidata.length; i++) {
+          for (let j = 0; j < energidata[i].length - 1; j++) {
+            energidata2.push([new Date((energidata[i][0] * 1000) + 60 * 60 * j * 1000), energidata[i][j + 1]]);
+            teller += 1;
+          }
+        }
+
+        console.log("energidata:");
+        console.log(energidata2);
+
+        ferdig2 = true;
+        sy_sammen();
+      }
     }
+
+    function hent_utetemperatur() {
+
+      fetch(url)
+        .then(response => response.text())
+        .then(data => myItems(data.substring(47).slice(0, -2))
+        );
+      function myItems(jsonString) {
+        const json = JSON.parse(jsonString);
+
+        grafdata = [];
+        for (let i = 0; i < json.table.rows.length; i++) {
+          grafdata[i] = [];
+          for (let j = 0; j < json.table.rows[i].c.length; j++) {
+            if (j === 0) {
+              grafdata[i][j] = new Date(json.table.rows[i].c[j].v); //første verdi er alltid tidspunkt, konverterer til date object
+            }
+            else {
+              grafdata[i][j] = Number(json.table.rows[i].c[j].v); // alle andre verdier er tall, konverterer til tall
+            }
+          }
+        }
+        grafdata.shift(); //forkaster første liste, er alltid overskrifter
+        grafdata.sort(function (a, b) { return a[0] - b[0] }); //sorterer etter dato fra eldste til nyeste
+
+        console.log("utetemperatur:");
+        console.log(grafdata);
+
+        ferdig1 = true;
+        sy_sammen();
+      }
+    }
+
+    function sy_sammen(a, b) {
+
+      if (ferdig1 && ferdig2) {
+        
+        til_graf = [];
+
+
+        for (let i = 0; i < grafdata.length; i++) {
+          fant = false;
+          for (let j = 0; j < energidata2.length; j++) {
+            if (grafdata[i][0].getTime() == energidata2[j][0].getTime()) {
+              til_graf[i] = [];
+              til_graf[i][0] = grafdata[i][0];
+              til_graf[i][1] = grafdata[i][1];
+              til_graf[i][2] = energidata2[j][1];
+
+              fant = true;
+            }
+            if (!fant && j == energidata2.length) {
+              console.log("fant ingen energi for " + grafdata[i][0]);
+            }
+
+          }
+        }
+/*
+        for (let i = 0; i < energidata2.length; i++) {
+          fant2 = false;
+          for (let j = 0; j < grafdata.length; j++) {
+            if (energidata2[i][0].getTime() == grafdata[j][0].getTime()) {
+              fant2 = true;
+            }
+            if (!fant2 && j == grafdata.length) {
+              console.log("fant ingen energi for " + energidata2[i][0]);
+            }
+          }
+        }
+
+        for (let i = 0; i < energidata2.length; i++) {
+          teller = 0;
+          for (let j = 0; j < energidata2.length; j++) {
+            if (energidata2[i][0].getTime() == energidata2[j][0]) {
+              teller++;
+              if (teller > 1) {
+                console.log("fant mer enn 1 stk for "+energidata2[i][0]);
+              }
+            }
+          }
+        }
+*/
+        console.log("data som vises i graf");
+        console.log(til_graf);
+
+
+
+        g.updateOptions({
+          'file': til_graf,
+          labels: labels
+        });
+
+      }
+
+
+    }
+
+    hent_utetemperatur();
+    hent_energidata();
+
+
+
+    // Darken a color
+    function darkenColor(colorStr) {
+      // Defined in dygraph-utils.js
+      var color = Dygraph.toRGB_(colorStr);
+      color.r = Math.floor((255 + color.r) / 2);
+      color.g = Math.floor((255 + color.g) / 2);
+      color.b = Math.floor((255 + color.b) / 2);
+      return 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
+    }
+
+    // This function draws bars for a single series. See
+    // multiColumnBarPlotter below for a plotter which can draw multi-series
+    // bar charts.
+    function barChartPlotter(e) {
+      var ctx = e.drawingContext;
+      var points = e.points;
+      var y_bottom = e.dygraph.toDomYCoord(0);
+
+      ctx.fillStyle = darkenColor(e.color);
+
+      // Find the minimum separation between x-values.
+      // This determines the bar width.
+      var min_sep = Infinity;
+      for (var i = 1; i < points.length; i++) {
+        var sep = points[i].canvasx - points[i - 1].canvasx;
+        if (sep < min_sep) min_sep = sep;
+      }
+      var bar_width = Math.floor(2.0 / 3 * min_sep);
+
+      // Do the actual plotting.
+      for (var i = 0; i < points.length; i++) {
+        var p = points[i];
+        var center_x = p.canvasx;
+
+        ctx.fillRect(center_x - bar_width / 2, p.canvasy,
+          bar_width, y_bottom - p.canvasy);
+
+        ctx.strokeRect(center_x - bar_width / 2, p.canvasy,
+          bar_width, y_bottom - p.canvasy);
+      }
+    }
+
   </script>
 </body>
 
