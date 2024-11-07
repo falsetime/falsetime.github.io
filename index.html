@@ -54,8 +54,20 @@
         },
         "kWh": {
           plotter: barChartPlotter,
-          color: "darkorange"
-        }
+          color: "darkorange",
+          axis: "y2"
+        },
+        axes: {
+              y: {
+                valueRange: [-40, 40],
+                //axisLabelWidth: 60
+              },
+              y2: {
+                // set axis-related properties here
+                valueRange: [0, 10],
+                //labelsKMB: true
+              }
+            },
       }
     });
 
@@ -188,8 +200,19 @@
 
 
         g.updateOptions({
-          'file': til_graf,
-          labels: labels
+          'file': til_graf/*,
+          axes: {
+              y: {
+                valueRange: [-40, 40],
+                //axisLabelWidth: 60
+              },
+              y2: {
+                // set axis-related properties here
+                valueRange: [0, 10],
+                labelsKMB: true
+              }
+            }*/
+          //labels: labels
         });
 
       }
