@@ -24,7 +24,7 @@
     // google sheets dokument: https://docs.google.com/spreadsheets/d/1h5NVjkJVEd7nCfP2H65_qVaOnB-r3XXiBnb5sQkgw2U/edit#gid=0
     // evig historisk data å sammenligne med: https://seklima.met.no/observations/
 
-    grafdata = [[1, 1, 1]];
+    grafdata = [[0, 0, 0]];
     energidata2 = [];
     labels = [];
 
@@ -51,24 +51,62 @@
           //strokeWidth: 2,
           //plotter: smoothPlotter,
           color: "teal"
-        },
+        }/*,
         "kWh": {
-          plotter: barChartPlotter,
-          color: "darkorange",
-          axis: "y2"
-        },
+          //plotter: barChartPlotter,
+          //color: "darkorange",
+          //axis: "y2"
+        }*/,
         axes: {
               y: {
-                valueRange: [-40, 40],
+                //valueRange: [-40, 40],
                 //axisLabelWidth: 60
               },
               y2: {
                 // set axis-related properties here
-                valueRange: [0, 10],
+                //valueRange: [-10, 10],
                 //labelsKMB: true
               }
-            },
-      }
+            }
+      },
+      zoomCallback: function(minDate, maxDate, yRange) {
+
+                // yRange will be an array [minY, maxY]
+                console.log("yrange");
+                console.log(yRange);
+
+                var minst = yRange[0][0];
+                var storst = yRange[0][1];
+                                              //bug!? fail safe
+                if (minst > storst) {
+                    minst = yRange[0][1];
+                    storst = yRange[0][0];
+                }
+                console.log("minst:");
+                console.log(minst);
+                console.log("størst:");
+                console.log(storst);
+               
+                g.updateOptions({
+          
+          axes: {
+              y: {
+                valueRange: [storst, minst],
+              }
+            }
+        });
+                
+                return false; // Ensure the original functionality is retained
+            
+            
+            
+            
+            
+              }
+
+
+
+
     });
 
     function hent_energidata() {
@@ -200,20 +238,39 @@
 
 
         g.updateOptions({
-          'file': til_graf/*,
+          'file': til_graf,
+          series: {
+            "kWh": {
+              plotter: barChartPlotter,
+              color: "darkorange",
+              axis: "y2"
+            }
+          },
           axes: {
               y: {
-                valueRange: [-40, 40],
+                //valueRange: [40, -15],
                 //axisLabelWidth: 60
               },
               y2: {
                 // set axis-related properties here
-                valueRange: [0, 10],
-                labelsKMB: true
+                //valueRange: [0, 10]
+                //labelsKMB: true
               }
-            }*/
+            }
           //labels: labels
         });
+
+        let [miniY, maxiY] = g.yAxisRange();
+  // Change either of these to a hard-coded value as you wish:
+  g.updateOptions({
+          
+          axes: {
+              y: {
+                valueRange: [maxiY, miniY],
+              }
+            }
+        });
+        
 
       }
 
@@ -241,7 +298,16 @@
     function barChartPlotter(e) {
       var ctx = e.drawingContext;
       var points = e.points;
-      var y_bottom = e.dygraph.toDomYCoord(0);
+      var y_maks_min = g.yAxisRange();
+      
+      //g.updateOptions({valueRange : [y_maks_min[1],y_maks_min[0]]});
+
+      
+
+      //console.log(y_maks_min);
+      //console.log("y_maks_min");
+      var y_bottom = e.dygraph.toDomYCoord(y_maks_min[0]); //koordinat på venstre y-akse der nullpunktet/bunnen av barchart starter
+
 
       ctx.fillStyle = darkenColor(e.color);
 
