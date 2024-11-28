@@ -42,7 +42,7 @@
     labels = ['Tid', 'Utetemperatur', 'kWh'];
 
     g = new Dygraph(document.getElementById("graph"), grafdata, {
-      animatedZooms: true,
+      //animatedZooms: true,
       //connectSeparatedPoints: true, //ingen visuelle hull ved manglende data
       labels: ['Tid', 'Utetemperatur', 'kWh'], // bare for å unngå feilmelding
       title: 'Energioppfølgingssystem',
@@ -57,17 +57,7 @@
           //color: "darkorange",
           //axis: "y2"
         }*/,
-        axes: {
-              y: {
-                //valueRange: [-40, 40],
-                //axisLabelWidth: 60
-              },
-              y2: {
-                // set axis-related properties here
-                //valueRange: [-10, 10],
-                //labelsKMB: true
-              }
-            }
+
       },
       zoomCallback: function(minDate, maxDate, yRange) {
 
@@ -248,14 +238,22 @@
           },
           axes: {
               y: {
+                axisLabelFormatter: function(v) {
+            return v + ' °C';  // controls formatting of the y-axis labels
+          }
                 //valueRange: [40, -15],
                 //axisLabelWidth: 60
               },
               y2: {
+/*
+                axisLabelFormatter: function(v) {
+            return v + ' kWh';  // controls formatting of the y-axis labels
+          } */
                 // set axis-related properties here
                 //valueRange: [0, 10]
                 //labelsKMB: true
               }
+              
             }
           //labels: labels
         });
